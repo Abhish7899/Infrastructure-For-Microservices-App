@@ -37,7 +37,7 @@ module "vpc" {
 }
 
 # -----------------------------------------------------------------------------
-# Module: Public Application Load Balancer with Path-Based Routing
+# Module: Public Application Load Balancer
 # -----------------------------------------------------------------------------
 module "alb" {
   source = "../../modules/alb"
@@ -48,18 +48,19 @@ module "alb" {
 }
 
 # -----------------------------------------------------------------------------
-# Module: Private Compute EC2 Instances & Amazon ECR Repositories
+# Module: Self-Managed Vanilla Kubernetes Nodes & ECR Repositories
 # -----------------------------------------------------------------------------
 module "compute" {
   source = "../../modules/compute"
 
-  vpc_id                 = module.vpc.vpc_id
-  private_app_subnet_ids = module.vpc.private_app_subnet_ids
-  alb_security_group_id  = module.alb.alb_security_group_id
-  task_target_group_arn  = module.alb.task_target_group_arn
-  stats_target_group_arn = module.alb.stats_target_group_arn
-  instance_type          = var.instance_type
-  environment            = var.environment
+  vpc_id                     = module.vpc.vpc_id
+  private_app_subnet_ids     = module.vpc.private_app_subnet_ids
+  alb_security_group_id      = module.alb.alb_security_group_id
+  ingress_target_group_arn   = module.alb.ingress_target_group_arn
+  master_instance_type       = var.master_instance_type
+  worker_instance_type       = var.worker_instance_type
+  s3_artifactory_bucket_name = var.s3_artifactory_bucket_name
+  environment                = var.environment
 }
 
 # -----------------------------------------------------------------------------
@@ -68,15 +69,15 @@ module "compute" {
 module "database" {
   source = "../../modules/database"
 
-  vpc_id                 = module.vpc.vpc_id
-  isolated_db_subnet_ids = module.vpc.isolated_db_subnet_ids
-  app_security_group_id  = module.compute.app_security_group_id
-  db_name                = var.db_name
-  master_username        = var.db_master_username
-  instance_class         = var.db_instance_class
-  allocated_storage      = var.db_allocated_storage
-  skip_final_snapshot    = var.skip_final_snapshot
-  environment            = var.environment
+  vpc_id                     = module.vpc.vpc_id
+  isolated_db_subnet_ids     = module.vpc.isolated_db_subnet_ids
+  k8s_node_security_group_id = module.compute.k8s_node_security_group_id
+  db_name                    = var.db_name
+  master_username            = var.db_master_username
+  instance_class             = var.db_instance_class
+  allocated_storage          = var.db_allocated_storage
+  skip_final_snapshot        = var.skip_final_snapshot
+  environment                = var.environment
 }
 
 # -----------------------------------------------------------------------------
@@ -112,5 +113,13 @@ resource "aws_ssm_parameter" "ecr_stats_repo_url" {
   description = "Amazon ECR Repository URL for stats-service"
   type        = "String"
   value       = module.compute.stats_ecr_repository_url
+  overwrite   = true
+}
+
+resource "aws_ssm_parameter" "master_private_ip" {
+  name        = "/${var.environment}/k8s/master_private_ip"
+  description = "Private IP address of the Kubernetes Master node for Stage 2 Ansible bootstrap"
+  type        = "String"
+  value       = module.compute.master_private_ip
   overwrite   = true
 }

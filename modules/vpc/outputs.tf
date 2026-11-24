@@ -1,5 +1,5 @@
 output "vpc_id" {
-  description = "The ID of the provisioned VPC"
+  description = "The ID of the custom VPC"
   value       = aws_vpc.main.id
 }
 
@@ -14,7 +14,7 @@ output "public_subnet_ids" {
 }
 
 output "private_app_subnet_ids" {
-  description = "List of IDs of private app subnets (EC2 backend nodes)"
+  description = "List of IDs of private app subnets (Kubernetes nodes)"
   value       = aws_subnet.private_app[*].id
 }
 

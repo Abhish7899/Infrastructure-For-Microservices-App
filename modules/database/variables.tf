@@ -8,8 +8,8 @@ variable "isolated_db_subnet_ids" {
   type        = list(string)
 }
 
-variable "app_security_group_id" {
-  description = "Security group ID of the EC2 backend compute nodes (allowed to access PostgreSQL on port 5432)"
+variable "k8s_node_security_group_id" {
+  description = "Security group ID of the Kubernetes nodes (allowed to access PostgreSQL on port 5432)"
   type        = string
 }
 

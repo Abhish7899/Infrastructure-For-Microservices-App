@@ -7,7 +7,10 @@ private_app_subnet_cidrs = ["10.0.10.0/24", "10.0.11.0/24"]
 isolated_db_subnet_cidrs = ["10.0.20.0/24", "10.0.21.0/24"]
 single_nat_gateway       = true
 
-instance_type        = "t3.small"
+master_instance_type       = "c7i-flex.large"
+worker_instance_type       = "t3.small"
+s3_artifactory_bucket_name = "e-commerce-artifactory"
+
 db_instance_class    = "db.t3.micro"
 db_allocated_storage = 20
 db_name              = "taskdb"

@@ -13,7 +13,7 @@ resource "aws_security_group" "alb" {
   }
 
   egress {
-    description = "Allow all outbound traffic to backend instances"
+    description = "Allow all outbound traffic to backend K8s worker nodes"
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
@@ -41,13 +41,11 @@ resource "aws_lb" "main" {
 }
 
 # -----------------------------------------------------------------------------
-# Target Groups with Health Checks & Deregistration Delay
+# Single Target Group: k8s-ingress-tg (Port 30080 NodePort)
 # -----------------------------------------------------------------------------
-
-# 1. Target Group: task-service (Port 3000)
-resource "aws_lb_target_group" "task_service" {
-  name                 = "tg-${var.environment}-task"
-  port                 = 3000
+resource "aws_lb_target_group" "k8s_ingress" {
+  name                 = "k8s-ingress-tg-${var.environment}"
+  port                 = 30080
   protocol             = "HTTP"
   vpc_id               = var.vpc_id
   target_type          = "instance"
@@ -55,9 +53,9 @@ resource "aws_lb_target_group" "task_service" {
 
   health_check {
     enabled             = true
-    path                = "/health"
+    path                = "/healthz"
     protocol            = "HTTP"
-    port                = "3000"
+    port                = "30080"
     interval            = 15
     timeout             = 5
     healthy_threshold   = 2
@@ -70,93 +68,21 @@ resource "aws_lb_target_group" "task_service" {
   }
 
   tags = {
-    Name    = "tg-${var.environment}-task"
-    Service = "task-service"
-  }
-}
-
-# 2. Target Group: stats-service (Port 4000)
-resource "aws_lb_target_group" "stats_service" {
-  name                 = "tg-${var.environment}-stats"
-  port                 = 4000
-  protocol             = "HTTP"
-  vpc_id               = var.vpc_id
-  target_type          = "instance"
-  deregistration_delay = 30
-
-  health_check {
-    enabled             = true
-    path                = "/health"
-    protocol            = "HTTP"
-    port                = "4000"
-    interval            = 15
-    timeout             = 5
-    healthy_threshold   = 2
-    unhealthy_threshold = 3
-    matcher             = "200"
-  }
-
-  lifecycle {
-    create_before_destroy = true
-  }
-
-  tags = {
-    Name    = "tg-${var.environment}-stats"
-    Service = "stats-service"
+    Name = "k8s-ingress-tg-${var.environment}"
+    Tier = "ingress"
   }
 }
 
 # -----------------------------------------------------------------------------
-# HTTP Listener & Path-Based Routing Rules
+# HTTP Listener (Port 80) Forwarding All Traffic to Ingress Target Group
 # -----------------------------------------------------------------------------
-
-# Port 80 Listener with fixed-response 404 fallback
 resource "aws_lb_listener" "http" {
   load_balancer_arn = aws_lb.main.arn
   port              = 80
   protocol          = "HTTP"
 
   default_action {
-    type = "fixed-response"
-
-    fixed_response {
-      content_type = "application/json"
-      message_body = jsonencode({ error = "Route not found" })
-      status_code  = "404"
-    }
-  }
-}
-
-# Listener Rule Priority 10: Route /api/tasks and /api/tasks/* to task-service
-resource "aws_lb_listener_rule" "task_service" {
-  listener_arn = aws_lb_listener.http.arn
-  priority     = 10
-
-  action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.task_service.arn
-  }
-
-  condition {
-    path_pattern {
-      values = ["/api/tasks", "/api/tasks/*"]
-    }
-  }
-}
-
-# Listener Rule Priority 20: Route /api/stats and /api/stats/* to stats-service
-resource "aws_lb_listener_rule" "stats_service" {
-  listener_arn = aws_lb_listener.http.arn
-  priority     = 20
-
-  action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.stats_service.arn
-  }
-
-  condition {
-    path_pattern {
-      values = ["/api/stats", "/api/stats/*"]
-    }
+    target_group_arn = aws_lb_target_group.k8s_ingress.arn
   }
 }

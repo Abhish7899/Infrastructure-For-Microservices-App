@@ -18,14 +18,9 @@ output "alb_security_group_id" {
   value       = aws_security_group.alb.id
 }
 
-output "task_target_group_arn" {
-  description = "The ARN of the task-service target group (port 3000)"
-  value       = aws_lb_target_group.task_service.arn
-}
-
-output "stats_target_group_arn" {
-  description = "The ARN of the stats-service target group (port 4000)"
-  value       = aws_lb_target_group.stats_service.arn
+output "ingress_target_group_arn" {
+  description = "The ARN of the k8s-ingress-tg target group (port 30080)"
+  value       = aws_lb_target_group.k8s_ingress.arn
 }
 
 output "http_listener_arn" {

@@ -23,14 +23,24 @@ output "alb_dns_name" {
   value       = module.alb.alb_dns_name
 }
 
-output "ec2_instance_ids" {
-  description = "List of EC2 application server IDs"
-  value       = module.compute.instance_ids
+output "k8s_master_id" {
+  description = "EC2 instance ID of the Kubernetes Master node"
+  value       = module.compute.master_instance_id
 }
 
-output "ec2_private_ips" {
-  description = "Private IP addresses of the application servers"
-  value       = module.compute.instance_private_ips
+output "k8s_master_private_ip" {
+  description = "Private IP address of the Kubernetes Master node"
+  value       = module.compute.master_private_ip
+}
+
+output "k8s_worker_ids" {
+  description = "List of EC2 instance IDs of the Kubernetes Worker nodes"
+  value       = module.compute.worker_instance_ids
+}
+
+output "k8s_worker_private_ips" {
+  description = "Private IP addresses of the Kubernetes Worker nodes"
+  value       = module.compute.worker_private_ips
 }
 
 output "rds_endpoint" {
@@ -60,5 +70,6 @@ output "ssm_parameters" {
     rds_endpoint       = aws_ssm_parameter.rds_endpoint.name
     ecr_task_repo_url  = aws_ssm_parameter.ecr_task_repo_url.name
     ecr_stats_repo_url = aws_ssm_parameter.ecr_stats_repo_url.name
+    master_private_ip  = aws_ssm_parameter.master_private_ip.name
   }
 }

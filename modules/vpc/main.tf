@@ -32,7 +32,7 @@ resource "aws_subnet" "public" {
   }
 }
 
-# 2. Private App Subnets (Private EC2 Application Servers)
+# 2. Private App Subnets (Self-managed Vanilla Kubernetes Master & Worker Nodes)
 resource "aws_subnet" "private_app" {
   count                   = length(var.private_app_subnet_cidrs)
   vpc_id                  = aws_vpc.main.id
@@ -46,7 +46,7 @@ resource "aws_subnet" "private_app" {
   }
 }
 
-# 3. Isolated Database Subnets (Amazon RDS PostgreSQL)
+# 3. Isolated Database Subnets (Amazon RDS PostgreSQL 16)
 resource "aws_subnet" "isolated_db" {
   count                   = length(var.isolated_db_subnet_cidrs)
   vpc_id                  = aws_vpc.main.id
@@ -60,7 +60,7 @@ resource "aws_subnet" "isolated_db" {
   }
 }
 
-# Elastic IPs for NAT Gateway(s) - AWS Provider v5 syntax (domain = "vpc")
+# Elastic IP(s) for NAT Gateway(s) - AWS Provider v5 syntax (domain = "vpc")
 resource "aws_eip" "nat" {
   count  = var.single_nat_gateway ? 1 : length(var.public_subnet_cidrs)
   domain = "vpc"
@@ -86,7 +86,7 @@ resource "aws_nat_gateway" "nat" {
 }
 
 # -----------------------------------------------------------------------------
-# Routing Tables & Subnet Associations
+# Route Tables & Subnet Associations
 # -----------------------------------------------------------------------------
 
 # Public Route Table -> Routes outbound traffic to Internet Gateway

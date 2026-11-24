@@ -29,13 +29,13 @@ variable "public_subnet_cidrs" {
 }
 
 variable "private_app_subnet_cidrs" {
-  description = "CIDR blocks for private app subnets"
+  description = "CIDR blocks for private app subnets (Kubernetes nodes)"
   type        = list(string)
   default     = ["10.0.10.0/24", "10.0.11.0/24"]
 }
 
 variable "isolated_db_subnet_cidrs" {
-  description = "CIDR blocks for isolated database subnets"
+  description = "CIDR blocks for isolated database subnets (RDS PostgreSQL)"
   type        = list(string)
   default     = ["10.0.20.0/24", "10.0.21.0/24"]
 }
@@ -46,10 +46,22 @@ variable "single_nat_gateway" {
   default     = true
 }
 
-variable "instance_type" {
-  description = "EC2 instance size for the private backend application servers"
+variable "master_instance_type" {
+  description = "EC2 instance size for the Kubernetes Master node"
+  type        = string
+  default     = "c7i-flex.large"
+}
+
+variable "worker_instance_type" {
+  description = "EC2 instance size for the Kubernetes Worker nodes"
   type        = string
   default     = "t3.small"
+}
+
+variable "s3_artifactory_bucket_name" {
+  description = "Name of the S3 artifactory bucket for Ansible SSM transport"
+  type        = string
+  default     = "e-commerce-artifactory"
 }
 
 variable "db_instance_class" {

@@ -16,11 +16,11 @@ resource "aws_security_group" "db" {
   vpc_id      = var.vpc_id
 
   ingress {
-    description     = "Allow inbound PostgreSQL 5432 from App EC2 nodes ONLY"
+    description     = "Allow inbound PostgreSQL 5432 from Kubernetes nodes strictly"
     from_port       = 5432
     to_port         = 5432
     protocol        = "tcp"
-    security_groups = [var.app_security_group_id]
+    security_groups = [var.k8s_node_security_group_id]
   }
 
   egress {

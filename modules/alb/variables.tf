@@ -4,7 +4,7 @@ variable "vpc_id" {
 }
 
 variable "public_subnet_ids" {
-  description = "List of public subnet IDs for the internet-facing ALB"
+  description = "List of public subnet IDs across 2 AZs for the internet-facing ALB"
   type        = list(string)
 }
 
