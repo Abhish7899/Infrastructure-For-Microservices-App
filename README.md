@@ -167,3 +167,22 @@ terraform apply
 The repository includes [.github/workflows/stage1-terraform.yml](file:///E:/Antigravity%20Projects/Infrastructure-For-Microservices-App/.github/workflows/stage1-terraform.yml):
 - **Pull Request (`main`)**: Runs `terraform fmt -check`, `terraform init`, `terraform validate`, and `terraform plan` using AWS OIDC federation (`AWS_ROLE_ARN`).
 - **Push (`main`)**: Deploys via `terraform apply -auto-approve` inside a protected GitHub `production` environment with manual approval gates.
+
+---
+
+## 6. Declarative Jenkins Pipeline (`Jenkinsfile`)
+
+The repository includes a production-grade `Jenkinsfile` at the root designed for Jenkins instances running on AWS EC2 with an attached IAM Instance Profile (zero static access keys):
+
+- **Parameters (`ACTION`)**:
+  - `plan`: Generates safe speculative plan (dry-run).
+  - `apply`: Generates plan, requests interactive manual approval (15-min timeout), provisions infrastructure, and waits for SSM node readiness.
+  - `destroy`: Generates destroy plan, requests interactive manual approval, destroys resources, and verifies zero billable compute remains.
+- **Safety Controls**:
+  - `disableConcurrentBuilds()` prevents concurrent runs colliding on S3 state lock.
+  - Plan artifacts (`tfplan`) are generated and applied without regeneration.
+  - Secure cleanup deletes `tfplan` in the `post { always }` block so no sensitive values remain on disk.
+- **SSM Readiness Exit Gate**:
+  - Upon `apply`, polls AWS EC2 and AWS SSM (up to 5 minutes) until all 3 Kubernetes nodes (`k8s-master`, `k8s-worker-1`, `k8s-worker-2`) report `PingStatus == Online`.
+  - Verifies `/prod/app/alb_dns` and `/prod/app/rds_endpoint` exist before handing off to Stage 2 (Ansible).
+
