@@ -116,6 +116,14 @@ resource "aws_ssm_parameter" "ecr_stats_repo_url" {
   overwrite   = true
 }
 
+resource "aws_ssm_parameter" "ecr_frontend_repo_url" {
+  name        = "/${var.environment}/app/ecr_frontend_repo_url"
+  description = "Amazon ECR Repository URL for frontend-service"
+  type        = "String"
+  value       = module.compute.frontend_ecr_repository_url
+  overwrite   = true
+}
+
 resource "aws_ssm_parameter" "master_private_ip" {
   name        = "/${var.environment}/k8s/master_private_ip"
   description = "Private IP address of the Kubernetes Master node for Stage 2 Ansible bootstrap"

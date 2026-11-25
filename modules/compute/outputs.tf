@@ -37,3 +37,8 @@ output "stats_ecr_repository_url" {
   description = "Repository URL for stats-service Amazon ECR"
   value       = aws_ecr_repository.services["stats-service"].repository_url
 }
+
+output "frontend_ecr_repository_url" {
+  description = "Repository URL for frontend-service Amazon ECR"
+  value       = aws_ecr_repository.services["frontend-service"].repository_url
+}

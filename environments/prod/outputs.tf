@@ -63,13 +63,19 @@ output "stats_ecr_url" {
   value       = module.compute.stats_ecr_repository_url
 }
 
+output "frontend_ecr_url" {
+  description = "Amazon ECR URL for frontend-service container images"
+  value       = module.compute.frontend_ecr_repository_url
+}
+
 output "ssm_parameters" {
   description = "Map of AWS SSM Parameter Store paths holding infrastructure values for Stage 2 & 3 handoff"
   value = {
-    alb_dns            = aws_ssm_parameter.alb_dns.name
-    rds_endpoint       = aws_ssm_parameter.rds_endpoint.name
-    ecr_task_repo_url  = aws_ssm_parameter.ecr_task_repo_url.name
-    ecr_stats_repo_url = aws_ssm_parameter.ecr_stats_repo_url.name
-    master_private_ip  = aws_ssm_parameter.master_private_ip.name
+    alb_dns               = aws_ssm_parameter.alb_dns.name
+    rds_endpoint          = aws_ssm_parameter.rds_endpoint.name
+    ecr_task_repo_url     = aws_ssm_parameter.ecr_task_repo_url.name
+    ecr_stats_repo_url    = aws_ssm_parameter.ecr_stats_repo_url.name
+    ecr_frontend_repo_url = aws_ssm_parameter.ecr_frontend_repo_url.name
+    master_private_ip     = aws_ssm_parameter.master_private_ip.name
   }
 }

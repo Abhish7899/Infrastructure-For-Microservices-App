@@ -245,7 +245,7 @@ resource "aws_lb_target_group_attachment" "workers" {
 # Amazon ECR Repositories & Retention Lifecycle Policy
 # -----------------------------------------------------------------------------
 locals {
-  ecr_repos = ["task-service", "stats-service"]
+  ecr_repos = ["task-service", "stats-service", "frontend-service"]
 }
 
 resource "aws_ecr_repository" "services" {
